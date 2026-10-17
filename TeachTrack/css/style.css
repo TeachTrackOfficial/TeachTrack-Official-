@@ -2177,3 +2177,43 @@ nav {
 .tt-term-editor .tt-grid-scroll{border-radius:12px;box-shadow:0 3px 15px rgba(44,10,26,.04)}
 .tt-term-editor .tt-editor-actions button{border-radius:9px;min-height:42px;font-weight:700}
 @media(max-width:600px){.tt-time-popover{width:min(270px,78vw)}.tt-overview-heading{flex-wrap:wrap}}
+
+
+/* SRNTS School Logo - Login Page */
+.login-brand .school-logo {
+    display: block;
+    width: 100px;
+    height: 100px;
+    max-width: 100%;
+    object-fit: contain;
+    background: transparent;
+    border-radius: 0;
+    margin: 0 0 25px;
+    flex-shrink: 0;
+}
+
+/* SRNTS School Logo - Dashboard and Teacher */
+.sidebar-brand .mini-logo {
+    display: block;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: transparent;
+    border-radius: 0;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Keep login text and form above the background */
+.login-brand,
+.login-card {
+    position: relative;
+    z-index: 1;
+}
+
+/* Prevent images from overflowing their containers */
+.login-brand img,
+.sidebar-brand img {
+    max-width: 100%;
+}
+
