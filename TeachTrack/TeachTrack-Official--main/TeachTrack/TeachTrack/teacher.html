@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>TeachTrack | Teacher</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <script
+        type="module"
+        src="js/teacher.js"
+    ></script>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="mini-logo"><img src="assets/srnts-logo.png" alt="San Rafael National Trade School logo"></div>
+
+            <div>
+
+                <h2>
+                    TeachTrack
+                </h2>
+
+                <small>
+                    SHS Management
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <nav>
+
+            <button
+                class="nav-item active"
+                data-section="teacherHome"
+            >
+                🏠 Dashboard
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-section="mySchedule"
+            >
+                📅 My Schedule
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-section="substituteRequests"
+            >
+                📩 Substitute Requests
+            </button>
+
+        </nav>
+
+
+        <a
+            id="logoutBtn"
+            class="logout-btn"
+            href="index.html"
+        >
+            ↪ Sign Out
+        </a>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1 id="pageTitle">
+                    Teacher Dashboard
+                </h1>
+
+                <p id="currentDate"></p>
+
+            </div>
+
+
+            <div class="profile">
+
+                <div
+                    class="profile-avatar"
+                    id="profileAvatar"
+                >
+                    T
+                </div>
+
+                <div>
+
+                    <strong id="userName">
+                        Teacher
+                    </strong>
+
+                    <small id="userRole">
+                        Teacher
+                    </small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ==========================================
+             TEACHER DASHBOARD
+        =========================================== -->
+
+        <section
+            id="teacherHome"
+            class="page-section active"
+        >
+
+            <div class="welcome-card">
+
+                <div>
+
+                    <span class="small-label">
+                        TEACHER DASHBOARD
+                    </span>
+
+                    <h2>
+                        Welcome,
+                        <span id="welcomeName">
+                            Teacher
+                        </span>!
+                    </h2>
+
+                    <p>
+                        Here is your schedule and
+                        substitute request information.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- TODAY'S SCHEDULE -->
+
+            <h2 class="section-title">
+                Today's Schedule
+            </h2>
+
+
+            <div
+                id="todaySchedule"
+                class="schedule-list"
+            >
+
+                <div class="loading">
+                    Loading today's schedule...
+                </div>
+
+            </div>
+
+
+            <!-- PENDING REQUESTS -->
+
+            <h2 class="section-title">
+                Pending Substitute Requests
+            </h2>
+
+
+            <div
+                id="pendingRequests"
+                class="request-list"
+            >
+
+                <div class="loading">
+                    Loading pending requests...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             MY WEEKLY SCHEDULE
+        =========================================== -->
+
+        <section
+            id="mySchedule"
+            class="page-section"
+        >
+
+            <h2 class="section-title">
+                My Weekly Schedule
+            </h2>
+
+
+            <p class="request-info">
+                Your approved Monday–Friday class schedule. Edit and submit changes using the semester timetable below.
+            </p>
+
+
+            <div
+                id="weeklySchedule"
+                class="weekly-schedule"
+            >
+
+                <div class="loading">
+                    Loading your schedule...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             SUBSTITUTE REQUESTS
+        =========================================== -->
+
+        <section
+            id="substituteRequests"
+            class="page-section"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Substitute Requests
+                    </h2>
+
+                    <p class="request-info">
+                        Review requests assigned to you.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="allRequests"
+                class="request-list"
+            >
+
+                <div class="loading">
+                    Loading substitute requests...
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     DECLINE REQUEST MODAL
+=========================================== -->
+
+<div
+    id="declineModal"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-card">
+
+        <button
+            type="button"
+            id="closeModal"
+            class="modal-close"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+
+        <h2>
+            Decline Substitute Request
+        </h2>
+
+
+        <p>
+            Please provide a reason for declining this
+            substitute request. Your reason will be
+            sent to the administrator for review.
+        </p>
+
+
+        <div class="input-group">
+
+            <label for="declineReason">
+                Reason for Declining
+            </label>
+
+            <textarea
+                id="declineReason"
+                placeholder="Enter your reason..."
+                rows="5"
+            ></textarea>
+
+        </div>
+
+
+        <p
+            id="declineError"
+            class="message error"
+        ></p>
+
+
+        <button
+            type="button"
+            id="submitDecline"
+            class="danger-btn"
+        >
+            Submit Decline
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+/* Local-file-safe navigation fallback: retains all existing application scripts. */
+document.querySelectorAll('.sidebar .nav-item[data-section]').forEach(button => {
+  button.addEventListener('click', () => {
+    const section = document.getElementById(button.dataset.section);
+    if (!section) return;
+    document.querySelectorAll('.sidebar .nav-item').forEach(item => item.classList.toggle('active', item === button));
+    document.querySelectorAll('.page-section').forEach(item => item.classList.toggle('active', item === section));
+    const title = document.getElementById('pageTitle');
+    if (title) title.textContent = button.textContent.trim();
+  });
+});
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script type="module" src="js/schedule-upload.js?v=20261011-syntax-repair-2"></script>
+</body>
+
+</html>

@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>TeachTrack | Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <script
+        type="module"
+        src="js/dashboard.js"
+    ></script>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- ==========================================
+         SIDEBAR
+    =========================================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="mini-logo"><img src="assets/srnts-logo.png" alt="San Rafael National Trade School logo"></div>
+
+            <div>
+
+                <h2>TeachTrack</h2>
+
+                <small>
+                    SHS Management
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <nav>
+
+            <button
+                class="nav-item active"
+                data-section="overview"
+            >
+                🏠 Dashboard
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-section="schedule"
+            >
+                📅 My Schedule
+            </button>
+
+
+            <button
+                class="nav-item teacher-only"
+                data-section="requests"
+            >
+                🔔 Substitute Requests
+            </button>
+
+
+            <button
+                class="nav-item admin-only"
+                data-section="teachers"
+            >
+                👥 Teachers
+            </button>
+
+
+            <button
+                class="nav-item admin-only"
+                data-section="records"
+            >
+                📊 Monthly Records
+            </button>
+
+
+            <button
+                class="nav-item admin-only"
+                data-section="declineReviews"
+            >
+                ⚠️ Decline Reviews
+            </button>
+
+        </nav>
+
+
+        <a
+            id="logoutBtn"
+            class="logout-btn"
+            href="index.html"
+        >
+            ↪ Sign Out
+        </a>
+
+    </aside>
+
+
+
+    <!-- ==========================================
+         MAIN
+    =========================================== -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1 id="pageTitle">
+                    Dashboard
+                </h1>
+
+                <p id="currentDate"></p>
+
+            </div>
+
+
+            <div class="profile">
+
+                <div class="profile-avatar">
+                    U
+                </div>
+
+
+                <div>
+
+                    <strong id="userName">
+                        User
+                    </strong>
+
+
+                    <small id="userRole">
+                        User
+                    </small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ==========================================
+             OVERVIEW
+        =========================================== -->
+
+        <section
+            id="overview"
+            class="page-section active"
+        >
+
+
+            <!-- WELCOME -->
+
+            <div class="welcome-card">
+
+                <div>
+
+                    <span class="small-label">
+                        WELCOME BACK
+                    </span>
+
+
+                    <h2>
+
+                        Hello,
+
+                        <span id="welcomeName">
+                            User
+                        </span>!
+
+                    </h2>
+
+
+                    <p>
+                        Here's what's happening with
+                        teacher availability today.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ======================================
+                 ADMIN TEACHER AVAILABILITY
+            ======================================= -->
+
+            <div class="admin-only">
+
+                <h2 class="section-title">
+                    Teacher Availability
+                </h2>
+
+
+                <p>
+                    Select a date and time to automatically
+                    check which teachers are available.
+                </p>
+
+
+                <div class="availability-controls">
+
+
+                    <div class="input-group">
+
+                        <label for="availabilityDate">
+                            Date
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="availabilityDate"
+                        >
+
+                    </div>
+
+
+
+                    <div class="input-group">
+
+                        <label for="availabilityStart">
+                            Start Time
+                        </label>
+
+
+                        <input
+                            type="time"
+                            id="availabilityStart"
+                        >
+
+                    </div>
+
+
+
+                    <div class="input-group">
+
+                        <label for="availabilityEnd">
+                            End Time
+                        </label>
+
+
+                        <input
+                            type="time"
+                            id="availabilityEnd"
+                        >
+
+                    </div>
+
+
+
+                    <button
+                        id="checkAvailabilityBtn"
+                        class="primary-btn"
+                        type="button"
+                    >
+                        Check Availability
+                    </button>
+
+                </div>
+
+
+                <p
+                    id="availabilityMessage"
+                    class="message"
+                ></p>
+
+
+                <!-- ==================================
+                     TEACHER AVAILABILITY RESULTS
+                =================================== -->
+
+                <div
+                    id="availableTeachers"
+                    class="teacher-grid"
+                >
+
+                    <div class="loading">
+
+                        Select a date and time to check
+                        teacher availability.
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================
+                     EMERGENCY AVAILABILITY CHECK
+                =================================== -->
+
+                <div class="emergency-availability-section">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h2 class="section-title">
+                                🚨 Emergency Availability Checks
+                            </h2>
+
+                            <p>
+                                If a teacher normally has a class during
+                                the selected time, you can ask the teacher
+                                if they are actually free right now.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="emergencyAvailabilityMessage"
+                        class="message"
+                    ></div>
+
+
+                    <div
+                        id="emergencyAvailabilityRequests"
+                        class="request-list"
+                    >
+
+                        <div class="loading">
+
+                            No emergency availability checks yet.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ======================================
+                 TEACHER OVERVIEW
+            ======================================= -->
+
+            <div class="teacher-only">
+
+
+                <h2 class="section-title">
+                    Today's Schedule
+                </h2>
+
+
+                <div
+                    id="todaySchedule"
+                    class="schedule-list"
+                >
+
+                    Loading schedule...
+
+                </div>
+
+
+
+                <h2 class="section-title">
+                    Pending Requests
+                </h2>
+
+
+                <div
+                    id="pendingRequests"
+                    class="request-list"
+                >
+
+                    Loading requests...
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             SCHEDULE
+        =========================================== -->
+
+        <section
+            id="schedule"
+            class="page-section"
+        >
+
+            <h2 class="section-title">
+                Weekly Schedule
+            </h2>
+
+
+            <div
+                id="weeklySchedule"
+                class="weekly-schedule"
+            >
+
+                Loading schedule...
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             TEACHER REQUESTS
+        =========================================== -->
+
+        <section
+            id="requests"
+            class="page-section teacher-only"
+        >
+
+            <h2 class="section-title">
+                Substitute Requests
+            </h2>
+
+
+            <div
+                id="allRequests"
+                class="request-list"
+            >
+
+                Loading requests...
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             ADMIN TEACHERS
+        =========================================== -->
+
+        <section
+            id="teachers"
+            class="page-section admin-only"
+        >
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Teachers
+                    </h2>
+
+
+                    <p>
+                        Manage teacher accounts,
+                        schedules, and availability.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ADD TEACHER -->
+
+            <div class="teacher-add-card">
+
+                <h3>
+                    Add Teacher Account
+                </h3>
+
+
+                <p>
+                    Create a teacher account for TeachTrack.
+                </p>
+
+
+
+                <div class="input-group">
+
+                    <label for="teacherName">
+                        Teacher Name
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="teacherName"
+                        placeholder="Enter teacher name"
+                    >
+
+                </div>
+
+
+
+                <div class="input-group">
+
+                    <label for="teacherEmail">
+                        Email
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="teacherEmail"
+                        placeholder="teacher@example.com"
+                    >
+
+                </div>
+
+
+
+                <div class="input-group">
+
+                    <label for="teacherPassword">
+                        Temporary Password
+                    </label>
+
+
+                    <input
+                        type="password"
+                        id="teacherPassword"
+                        placeholder="Enter temporary password"
+                    >
+
+                </div>
+
+
+
+                <button
+                    id="addTeacherBtn"
+                    class="primary-btn"
+                    type="button"
+                >
+                    Add Teacher
+                </button>
+
+
+                <p
+                    id="teacherMessage"
+                    class="message"
+                ></p>
+
+            </div>
+
+
+
+            <!-- Term schedule importer is mounted here by schedule-upload.js -->
+            <div id="termScheduleMount" class="tt-schedule-mount">
+              <div class="tt-upload-loading"><strong>📅 Upload Official Term Schedule</strong><p>Loading schedule uploader…</p></div>
+            </div>
+
+            <h2 class="section-title">
+                Teacher Accounts
+            </h2>
+
+
+            <div
+                id="teacherList"
+                class="teacher-grid"
+            >
+
+                Loading teachers...
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             MONTHLY RECORDS
+        =========================================== -->
+
+        <section
+            id="records"
+            class="page-section admin-only"
+        >
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Monthly Records
+                    </h2>
+
+
+                    <p>
+                        View substitute activity
+                        records by month.
+                    </p>
+
+                </div>
+
+
+                <input
+                    type="month"
+                    id="recordMonth"
+                    class="month-input"
+                >
+
+            </div>
+
+
+
+            <div class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <span>
+                        Total Requests
+                    </span>
+
+
+                    <strong id="totalRequests">
+                        0
+                    </strong>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <span>
+                        Accepted
+                    </span>
+
+
+                    <strong id="acceptedRequests">
+                        0
+                    </strong>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <span>
+                        Declined
+                    </span>
+
+
+                    <strong id="declinedRequests">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <div
+                id="monthlyRecords"
+                class="records-table"
+            >
+
+                Loading records...
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             ADMIN DECLINE REVIEWS
+        =========================================== -->
+
+        <section
+            id="declineReviews"
+            class="page-section admin-only"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Decline Reviews
+                    </h2>
+
+
+                    <p>
+                        Review substitute requests that
+                        teachers have declined.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="declineReviewList"
+                class="request-list"
+            >
+
+                Loading decline reviews...
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+
+<!-- ==========================================
+     DECLINE MODAL
+=========================================== -->
+
+<div
+    id="declineModal"
+    class="modal hidden"
+>
+
+    <div class="modal-card">
+
+
+        <button
+            id="closeModal"
+            class="modal-close"
+            type="button"
+        >
+            ×
+        </button>
+
+
+        <h2>
+            Decline Request
+        </h2>
+
+
+        <p>
+            Please provide a valid reason for
+            declining this substitute request.
+        </p>
+
+
+        <textarea
+            id="declineReason"
+            placeholder="Enter your reason..."
+            rows="5"
+        ></textarea>
+
+
+        <p
+            id="declineError"
+            class="message error"
+        ></p>
+
+
+        <button
+            id="submitDecline"
+            class="danger-btn"
+            type="button"
+        >
+            Submit Decline
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================
+     SEND SUBSTITUTE REQUEST MODAL
+=========================================== -->
+
+<div
+    id="requestModal"
+    class="modal hidden"
+>
+
+    <div class="modal-card">
+
+
+        <button
+            id="closeRequestModal"
+            class="modal-close"
+            type="button"
+        >
+            ×
+        </button>
+
+
+        <h2>
+            Send Substitute Request
+        </h2>
+
+
+        <p>
+            Enter the details of the teacher who needs
+            a substitute.
+        </p>
+
+
+
+        <div class="input-group">
+
+            <label for="absentTeacher">
+                Absent Teacher
+            </label>
+
+
+            <select
+                id="absentTeacher"
+            >
+
+                <option value="">
+                    Select absent teacher
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label for="requestSubject">
+                Subject
+            </label>
+
+
+            <input
+                id="requestSubject"
+                type="text"
+                placeholder="Example: Programming"
+            >
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label for="requestSection">
+                Grade / Section
+            </label>
+
+
+            <input
+                id="requestSection"
+                type="text"
+                placeholder="Example: Grade 11 - Banatao"
+            >
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label for="requestDate">
+                Date
+            </label>
+
+
+            <input
+                id="requestDate"
+                type="date"
+            >
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label for="requestStartTime">
+                Start Time
+            </label>
+
+
+            <input
+                id="requestStartTime"
+                type="time"
+            >
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label for="requestEndTime">
+                End Time
+            </label>
+
+
+            <input
+                id="requestEndTime"
+                type="time"
+            >
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label for="substituteTeacher">
+                Substitute Teacher
+            </label>
+
+
+            <input
+                id="substituteTeacher"
+                type="text"
+                placeholder="Selected available teacher"
+                readonly
+            >
+
+        </div>
+
+
+
+        <!-- REQUEST MESSAGE -->
+
+        <div class="input-group">
+
+            <label for="requestMessageInput">
+                Message
+            </label>
+
+
+            <textarea
+                id="requestMessageInput"
+                rows="4"
+                placeholder="Optional message for the substitute teacher..."
+            ></textarea>
+
+        </div>
+
+
+
+        <p
+            id="requestMessage"
+            class="message"
+        ></p>
+
+
+
+        <button
+            id="sendRequestBtn"
+            class="primary-btn"
+            type="button"
+        >
+            Send Request
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+/* Local-file-safe navigation fallback: retains all existing application scripts. */
+document.querySelectorAll('.sidebar .nav-item[data-section]').forEach(button => {
+  button.addEventListener('click', () => {
+    const section = document.getElementById(button.dataset.section);
+    if (!section) return;
+    document.querySelectorAll('.sidebar .nav-item').forEach(item => item.classList.toggle('active', item === button));
+    document.querySelectorAll('.page-section').forEach(item => item.classList.toggle('active', item === section));
+    const title = document.getElementById('pageTitle');
+    if (title) title.textContent = button.textContent.trim();
+  });
+});
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script type="module" src="js/schedule-upload.js?v=20261011-syntax-repair-2"></script>
+<a href="approvals.html" style="position:fixed;bottom:18px;right:18px;z-index:9999;background:#651b35;color:white;padding:12px 16px;border-radius:10px;box-shadow:0 3px 12px #0004;text-decoration:none">Teacher Approvals</a>
+</body>
+
+</html>
