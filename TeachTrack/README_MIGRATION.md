@@ -18,3 +18,12 @@ This package removes Firebase client imports and adds a Vercel serverless API an
 - Some original flows assume Firestore behavior and may need additional adjustments after end-to-end testing against a deployed database.
 - Never publish database credentials, SESSION_SECRET, or a service account key. Use unique passwords and secure account recovery procedures.
 - To run automated core tests: `npm test`.
+
+## Teacher self-registration update
+- Public Create Teacher Account accepts a full name, real email address, and a NEW TeachTrack-only password (minimum 12 characters).
+- Registrations create **disabled/pending** teacher accounts. School administrators must verify the teacher independently and approve at `/approvals.html` after signing in. The registration form cannot create admin accounts.
+- Admin accounts must be provisioned privately using `scripts/create-admin.mjs` after `schema.sql` is applied. Use individual admin accounts where possible.
+- **IMPORTANT:** This version does NOT verify ownership of the submitted email address. Approval by a school administrator is required; do not assume an email belongs to the registrant. Password reset, abuse throttling and production security review are still needed before real-world use.
+- In Neon SQL Editor run the entire `schema.sql` from this ZIP. Earlier manually created `users` table is not used by the backend; the API requires `tt_users` and `tt_documents`. Existing `users` can remain untouched.
+- Set `SESSION_SECRET` in Vercel to a unique random string at least 32 characters long; `DATABASE_URL` must also be configured. Redeploy after setting environment variables.
+- To create admin locally, use environment variables rather than putting secrets in GitHub. Never put a real password in chat.

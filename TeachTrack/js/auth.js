@@ -170,3 +170,23 @@ if (loginForm) {
         "TeachTrack: Login form not found. Check the loginForm ID in index.html."
     );
 }
+
+// Teacher self-registration; administrators are provisioned separately.
+const registerForm=document.getElementById('registerForm');
+const showRegister=document.getElementById('showRegister');
+const backToLogin=document.getElementById('backToLogin');
+function switchForm(register){registerForm.hidden=!register;loginForm.hidden=register;showRegister.hidden=register;}
+showRegister?.addEventListener('click',()=>switchForm(true));
+backToLogin?.addEventListener('click',()=>switchForm(false));
+registerForm?.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const msg=document.getElementById('registerMessage');
+ const password=document.getElementById('regPassword').value;
+ if(password!==document.getElementById('regConfirm').value){msg.textContent='Passwords do not match.';return;}
+ const btn=registerForm.querySelector('button[type="submit"]');btn.disabled=true;msg.textContent='Submitting...';
+ try{
+  const res=await fetch('/api/teachtrack',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',name:document.getElementById('regName').value,username:document.getElementById('regEmail').value,password})});
+  const data=await res.json();if(!res.ok)throw Error(data.error||'Registration failed');
+  msg.textContent=data.message;registerForm.reset();
+ }catch(err){msg.textContent=err.message;}finally{btn.disabled=false;}
+});

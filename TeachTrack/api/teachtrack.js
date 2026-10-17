@@ -12,9 +12,34 @@ function parse(path){if(typeof path!=='string'||path.length>240)throw Error('Inv
 function allowed(user,seg,write,data){if(user.role==='admin')return true;if(seg[0]==='users')return !write&&seg.length===2&&seg[1]===user.id;if(seg[0]==='schedules'||seg[0]==='termScheduleDrafts'||seg[0]==='teacherTermSchedules')return seg.length>=2&&seg[1]===user.id;if(seg[0]==='termScheduleSubmissions')return !write || (data?.teacherId===user.id && data?.status==='pending');if(seg[0]==='substituteRequests')return !write || (seg.length===2 && data?.assignedTeacherId===user.id);return false;}
 const fail=(res,code,error)=>res.status(code).json({error});
 export default async function handler(req,res){if(req.method!=='POST')return fail(res,405,'POST required');res.setHeader('Cache-Control','no-store');try{
-const {action,username,password,path,data,merge,filters=[]}=req.body||{};
-if(action==='login') {if(typeof username!=='string'||typeof password!=='string')return fail(res,400,'Username and password required');const r=await pool.query('select * from tt_users where lower(username)=lower($1) and enabled=true',[username.trim()]);const u=r.rows[0];if(!u||!verify(password,u.password_hash))return fail(res,401,'Incorrect username or password');const id=randomUUID();await pool.query("update tt_users set session_id=$1,session_expires=now()+interval '7 days' where id=$2",[id,u.id]);res.setHeader('Set-Cookie',`tt_session=${id}.${sign(id)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`);return res.json({user:{uid:u.id,username:u.username,email:u.username,role:u.role}})}
+const {action,username,password,name,path,data,merge,filters=[]}=req.body||{};
+if(action==='register') {
+  // Teacher self-registration only. Accounts require an administrator's approval.
+  if(typeof username!=='string'||typeof password!=='string'||typeof name!=='string')return fail(res,400,'Complete all fields');
+  const email=username.trim().toLowerCase(), fullName=name.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254)return fail(res,400,'Enter a valid school email address');
+  if(fullName.length<2||fullName.length>100)return fail(res,400,'Enter your full name');
+  if(password.length<12||password.length>128)return fail(res,400,'Password must be 12–128 characters');
+  const id=randomUUID();
+  await pool.query('insert into tt_users(id,username,password_hash,role,name,enabled) values($1,$2,$3,$4,$5,false)',[id,email,hash(password),'teacher',fullName]);
+  await pool.query('insert into tt_documents(path,collection,data) values($1,$2,$3)', ['users/'+id,'users',JSON.stringify({name:fullName,email,role:'teacher'})]);
+  return res.status(201).json({ok:true,message:'Registration received. A school administrator must approve your account before you can sign in.'});
+}
+if(action==='login') {if(typeof username!=='string'||typeof password!=='string')return fail(res,400,'Username and password required');const r=await pool.query('select * from tt_users where lower(username)=lower($1)',[username.trim()]);const u=r.rows[0];if(!u||!verify(password,u.password_hash))return fail(res,401,'Incorrect username or password');if(!u.enabled)return fail(res,403,'Account pending school administrator approval');const id=randomUUID();await pool.query("update tt_users set session_id=$1,session_expires=now()+interval '7 days' where id=$2",[id,u.id]);res.setHeader('Set-Cookie',`tt_session=${id}.${sign(id)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`);return res.json({user:{uid:u.id,username:u.username,email:u.username,role:u.role}})}
 const user=await current(req);
+if(action==='pendingTeachers'){
+ if(!user||user.role!=='admin')return fail(res,403,'Admin only');
+ const r=await pool.query("select id,username,name from tt_users where role='teacher' and enabled=false order by username limit 200");
+ return res.json({teachers:r.rows});
+}
+if(action==='approveTeacher'){
+ if(!user||user.role!=='admin')return fail(res,403,'Admin only');
+ if(typeof req.body?.teacherId!=='string')return fail(res,400,'Teacher ID required');
+ const r=await pool.query("update tt_users set enabled=true where id=$1 and role='teacher' and enabled=false returning id",[req.body.teacherId]);
+ if(!r.rowCount)return fail(res,404,'Pending teacher not found');
+ return res.json({ok:true});
+}
+
 if(action==='me')return res.json({user:user?{uid:user.id,username:user.username,email:user.username,role:user.role}:null});
 if(!user)return fail(res,401,'Please sign in');
 if(action==='logout'){await pool.query('update tt_users set session_id=null where id=$1',[user.id]);res.setHeader('Set-Cookie','tt_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');return res.json({ok:true})}

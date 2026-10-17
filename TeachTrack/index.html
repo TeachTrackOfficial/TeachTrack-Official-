@@ -65,7 +65,18 @@
                 <p id="loginMessage" class="message"></p>
 
             </form>
-
+            <p style="text-align:center;margin-top:16px"><button type="button" id="showRegister" class="primary-btn" style="width:100%;background:transparent;border:1px solid currentColor">Create Teacher Account</button></p>
+            <form id="registerForm" hidden style="margin-top:18px">
+              <h2>Create Teacher Account</h2>
+              <p class="login-subtitle">Use your real school email and a new password just for TeachTrack. Registration requires school approval.</p>
+              <div class="input-group"><label for="regName">Full Name</label><input id="regName" maxlength="100" autocomplete="name" required></div>
+              <div class="input-group"><label for="regEmail">School Email</label><input id="regEmail" type="email" autocomplete="email" required></div>
+              <div class="input-group"><label for="regPassword">New TeachTrack Password</label><input id="regPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div>
+              <div class="input-group"><label for="regConfirm">Confirm Password</label><input id="regConfirm" type="password" minlength="12" autocomplete="new-password" required></div>
+              <button type="submit" class="primary-btn">Submit Registration</button>
+              <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
+              <button type="button" id="backToLogin" style="margin-top:12px">Back to Sign In</button>
+            </form>
         </div>
 
     </div>
