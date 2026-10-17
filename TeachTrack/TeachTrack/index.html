@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeachTrack | Login</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script type="module" src="js/auth.js"></script>
+</head>
+
+<body class="login-body">
+
+    <div class="login-container">
+
+        <div class="login-brand">
+            <div class="school-logo">
+                SRNTS
+            </div>
+
+            <h1>TeachTrack</h1>
+
+            <p>
+                Digital Teacher Availability<br>
+                Tracking System
+            </p>
+
+            <span>Senior High School</span>
+        </div>
+
+        <div class="login-card">
+
+            <h2 id="authHeading">Welcome Back</h2>
+            <p class="login-subtitle" id="authSubtitle">
+                Sign in to access TeachTrack
+            </p>
+
+            <form id="loginForm">
+
+                <div class="input-group">
+                    <label for="email">Username or Gmail address</label>
+                    <input
+                        type="text"
+                        id="email"
+                        placeholder="Enter your username or Gmail address"
+                        required
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="primary-btn">
+                    Sign In
+                </button>
+
+                <p id="loginMessage" class="message"></p>
+
+            </form>
+            <p id="registerPrompt" style="text-align:center;margin-top:16px"><button type="button" id="showRegister" class="primary-btn" style="width:100%;background:transparent;border:1px solid currentColor">Create Teacher Account</button></p>
+            <form id="registerForm" hidden style="margin-top:18px">
+              <h3 style="margin-bottom:12px">Teacher registration</h3>
+              <p class="login-subtitle">Use your own Gmail or school email and a new password only for TeachTrack. Your school administrator must verify your identity and approve the account before you can sign in.</p>
+              <div class="input-group"><label for="regName">Full Name</label><input id="regName" maxlength="100" autocomplete="name" required></div>
+              <div class="input-group"><label for="regEmail">Gmail or School Email</label><input id="regEmail" type="email" autocomplete="email" required></div>
+              <div class="input-group"><label for="regPassword">New TeachTrack Password</label><input id="regPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div>
+              <div class="input-group"><label for="regConfirm">Confirm Password</label><input id="regConfirm" type="password" minlength="12" autocomplete="new-password" required></div>
+              <button type="submit" class="primary-btn">Submit Registration</button>
+              <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
+              <button type="button" id="backToLogin" style="margin-top:12px">Back to Sign In</button>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>
