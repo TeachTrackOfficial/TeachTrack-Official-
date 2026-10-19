@@ -43,6 +43,23 @@ if(action==='approveTeacher'){
 if(action==='me')return res.json({user:user?{uid:user.id,username:user.username,email:user.username,role:user.role}:null});
 if(!user)return fail(res,401,'Please sign in');
 if(action==='logout'){await pool.query('update tt_users set session_id=null where id=$1',[user.id]);res.setHeader('Set-Cookie','tt_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');return res.json({ok:true})}
+if(action==='deleteTeacher'){
+ if(user.role!=='admin')return fail(res,403,'Admin only');
+ const teacherId=req.body?.teacherId;
+ if(typeof teacherId!=='string'||!teacherId||teacherId.length>100)return fail(res,400,'Valid teacher ID required');
+ if(req.body?.confirmation!=='DELETE')return fail(res,400,'Deletion confirmation required');
+ if(teacherId===user.id)return fail(res,403,'You cannot delete your own account');
+ const client=await pool.connect();
+ try{
+  await client.query('BEGIN');
+  const removed=await client.query("delete from tt_users where id=$1 and role='teacher' returning id",[teacherId]);
+  if(!removed.rowCount){await client.query('ROLLBACK');return fail(res,404,'Teacher account not found');}
+  await client.query('delete from tt_documents where path=$1 and collection=$2',['users/'+teacherId,'users']);
+  await client.query('COMMIT');
+  return res.json({ok:true});
+ }catch(error){await client.query('ROLLBACK');throw error}
+ finally{client.release()}
+}
 if(action==='createTeacher'){if(user.role!=='admin')return fail(res,403,'Admin only');if(!/^[a-zA-Z0-9_.-]{3,40}$/.test(username||'')||typeof password!=='string'||password.length<10)return fail(res,400,'Invalid username or password (minimum 10 characters)');const id=randomUUID();await pool.query('insert into tt_users(id,username,password_hash,role,name) values($1,$2,$3,$4,$5)',[id,username,hash(password),'teacher',username]);await pool.query('insert into tt_documents(path,collection,data) values($1,$2,$3)', ['users/'+id,'users',JSON.stringify({name:username,email:username,role:'teacher'})]);return res.json({user:{uid:id,email:username,username}})}
 const seg=parse(path);const write=['set','update','add'].includes(action);
 if(!allowed(user,seg,write,data))return fail(res,403,'Access denied');

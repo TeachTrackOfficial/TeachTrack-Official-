@@ -2217,3 +2217,19 @@ nav {
     max-width: 100%;
 }
 
+
+/* Admin-only teacher account deletion control */
+.delete-teacher-btn {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border: 1px solid #b42332;
+    border-radius: 9px;
+    background: #fff1f2;
+    color: #9f1239;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.delete-teacher-btn:hover { background: #ffe4e6; }
+.delete-teacher-btn:disabled { opacity: .6; cursor: wait; }
