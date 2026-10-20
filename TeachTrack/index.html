@@ -54,6 +54,7 @@
                         placeholder="Enter your password"
                         required
                     >
+<button type="button" class="tt-password-toggle" data-password-target="password" aria-pressed="false">Show password</button>
                 </div>
 
                 <button type="submit" class="primary-btn">
@@ -75,8 +76,10 @@
               <p class="login-subtitle">Use your real school email and a new password just for TeachTrack. Registration requires school approval.</p>
               <div class="input-group"><label for="regName">Full Name</label><input id="regName" maxlength="100" autocomplete="name" required></div>
               <div class="input-group"><label for="regEmail">School Email</label><input id="regEmail" type="email" autocomplete="email" required></div>
-              <div class="input-group"><label for="regPassword">New TeachTrack Password</label><input id="regPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div>
-              <div class="input-group"><label for="regConfirm">Confirm Password</label><input id="regConfirm" type="password" minlength="12" autocomplete="new-password" required></div>
+              <div class="input-group"><label for="regPassword">New TeachTrack Password</label><input id="regPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+<button type="button" class="tt-password-toggle" data-password-target="regPassword" aria-pressed="false">Show password</button></div>
+              <div class="input-group"><label for="regConfirm">Confirm Password</label><input id="regConfirm" type="password" minlength="12" autocomplete="new-password" required>
+<button type="button" class="tt-password-toggle" data-password-target="regConfirm" aria-pressed="false">Show password</button></div>
               <button type="submit" class="primary-btn">Submit Registration</button>
               <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
               <button type="button" id="backToLogin" style="margin-top:12px">Back to Sign In</button>
@@ -85,5 +88,17 @@
 
     </div>
 
+<script>
+document.querySelectorAll('[data-password-target]').forEach(button => {
+  button.addEventListener('click', () => {
+    const field = document.getElementById(button.dataset.passwordTarget);
+    if (!field) return;
+    const showing = field.type === 'password';
+    field.type = showing ? 'text' : 'password';
+    button.textContent = showing ? 'Hide password' : 'Show password';
+    button.setAttribute('aria-pressed', String(showing));
+  });
+});
+</script>
 </body>
 </html>
