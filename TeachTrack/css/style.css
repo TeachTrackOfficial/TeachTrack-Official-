@@ -2233,3 +2233,195 @@ nav {
 }
 .delete-teacher-btn:hover { background: #ffe4e6; }
 .delete-teacher-btn:disabled { opacity: .6; cursor: wait; }
+
+/* Accessible password visibility control */
+.tt-password-toggle {
+    display: block;
+    width: auto;
+    margin: 6px 0 12px auto;
+    padding: 4px 2px;
+    border: 0;
+    background: transparent;
+    color: #800020;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.tt-password-toggle:hover, .tt-password-toggle:focus-visible {
+    text-decoration: underline;
+}
+
+
+/* =============================================================
+   TEACHTRACK / AURORA — visual redesign, no data or API changes
+   ============================================================= */
+:root {
+  --maroon:#800020; --dark-maroon:#490015; --light-maroon:#fff0f3;
+  --background:#f6f3f5; --text:#281e25; --muted:#766c74;
+  --border:#eadfe5; --shadow:0 16px 48px rgba(73,0,21,.09);
+  --tt-gold:#d9ac66;
+}
+body {background:linear-gradient(125deg,#fbf8f9 0%,#f6f1f5 48%,#f3f5f8 100%);letter-spacing:-.012em;}
+body:not(.login-body)::before {content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 45% 32% at 98% 0%,rgba(155,31,74,.065),transparent 75%),radial-gradient(ellipse 45% 40% at 35% 100%,rgba(215,170,103,.075),transparent 80%);}
+.app{position:relative;isolation:isolate;}
+.sidebar {width:272px;padding:30px 18px 24px;background:linear-gradient(165deg,#420014 0%,#65001c 55%,#31000f 100%);border-right:1px solid rgba(255,255,255,.14);box-shadow:16px 0 55px rgba(57,0,17,.13);overflow:hidden;}
+.sidebar::before {content:"";position:absolute;inset:-130px -150px auto auto;width:330px;height:330px;border:1px solid rgba(230,180,109,.14);border-radius:50%;box-shadow:0 0 0 48px rgba(255,255,255,.018),0 0 0 100px rgba(255,255,255,.012);pointer-events:none;}
+.sidebar::after {content:"";position:absolute;inset:auto -100px -160px auto;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(215,166,96,.12),transparent 67%);pointer-events:none;}
+.sidebar-brand{position:relative;z-index:1;padding:13px 9px 25px;margin-bottom:25px;border-bottom:1px solid rgba(255,255,255,.15);gap:14px;}
+.sidebar-brand h2{color:#fff;font-weight:800;letter-spacing:-.045em;font-size:22px;}
+.sidebar-brand small{color:#dfc4cb;font-size:12px;letter-spacing:.06em;}
+.sidebar-brand .mini-logo,.sidebar-brand img{background:#fff!important;border-radius:15px!important;object-fit:contain!important;}
+.sidebar nav{position:relative;z-index:1;gap:8px;}
+.sidebar .nav-item{color:#f3dfe5;background:transparent;border:1px solid transparent;border-radius:13px;padding:15px 17px;font-weight:600;font-size:14px;transition:background .22s,border-color .22s,transform .22s,box-shadow .22s;}
+.sidebar .nav-item:hover{color:#fff;background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.13);transform:translateX(4px);}
+.sidebar .nav-item.active{color:#4e0018;background:linear-gradient(115deg,#f8e8ed,#fff9ef);border-color:rgba(255,255,255,.65);box-shadow:0 9px 26px rgba(25,0,7,.24),inset 3px 0 0 #d9ac66;}
+.sidebar .logout-btn{position:relative;z-index:1;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:13px;text-decoration:none;}
+.sidebar .logout-btn:hover{background:rgba(255,255,255,.18);}
+.main{margin-left:272px;width:calc(100% - 272px);padding:35px clamp(22px,3vw,55px) 60px;position:relative;z-index:1;}
+.topbar{padding:0 0 23px;margin-bottom:26px;border-bottom:1px solid rgba(113,51,75,.12);gap:18px;}
+.topbar h1{font-size:clamp(29px,3vw,40px);font-weight:850;letter-spacing:-.05em;background:linear-gradient(100deg,#3d0015,#92012b 70%);background-clip:text;-webkit-background-clip:text;color:transparent;}
+.topbar p{color:#7d7078;margin-top:6px;}
+.section-title{letter-spacing:-.035em;color:#65001d;font-weight:800;}
+.page-section.active{animation:ttPageIn .48s cubic-bezier(.2,.7,.2,1) both;}
+@keyframes ttPageIn{from{opacity:.25;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}
+:is(.welcome-card,.stat-card,.teacher-card,.teacher-add-card,.modal-card,.login-card,.records-table,.emergency-availability-section){border:1px solid rgba(135,49,82,.1);box-shadow:0 12px 34px rgba(68,0,22,.075);}
+:is(.stat-card,.teacher-card,.teacher-add-card,.modal-card,.login-card){border-radius:20px;}
+:is(.stat-card,.teacher-card){transition:transform .26s ease,box-shadow .26s ease,border-color .26s ease;}
+:is(.stat-card,.teacher-card):hover{transform:translateY(-5px);box-shadow:0 22px 46px rgba(82,0,27,.13);border-color:rgba(154,46,79,.25);}
+.welcome-card{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(120deg,#520017 0%,#870029 63%,#ab3950 100%);box-shadow:0 22px 45px rgba(91,0,29,.2);}
+.welcome-card::before{content:"";position:absolute;right:-85px;top:-125px;width:340px;height:340px;border:1px solid rgba(255,255,255,.2);border-radius:50%;box-shadow:0 0 0 48px rgba(255,255,255,.035),0 0 0 98px rgba(255,255,255,.025);pointer-events:none;}
+.welcome-card::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,224,172,.12) 62%,transparent 80%);transform:translateX(-100%);animation:ttGlow 10s ease-in-out infinite;pointer-events:none;}
+@keyframes ttGlow{0%,55%,100%{transform:translateX(-100%)}80%{transform:translateX(100%)}}
+:is(button,.primary-btn,input,select,textarea){transition:border-color .2s,box-shadow .2s,background-color .2s,transform .2s;}
+button:not(.nav-item):not(.tt-password-toggle):not(.logout-btn):hover{filter:brightness(1.055);}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(218,167,91,.75);outline-offset:3px;}
+input:focus,select:focus,textarea:focus{border-color:#a13b5d;box-shadow:0 0 0 4px rgba(140,0,40,.09);}
+.records-table{overflow:hidden;border-radius:17px;}
+/* Login: premium, atmospheric, readable */
+.login-body{background:radial-gradient(ellipse at 85% 15%,rgba(234,174,108,.24),transparent 38%),radial-gradient(ellipse at 0% 85%,rgba(185,35,87,.28),transparent 48%),linear-gradient(135deg,#26000e,#65001d 52%,#31000e);}
+.login-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(120deg,transparent 0 95px,rgba(255,255,255,.018) 96px 97px);}
+.login-container{border:1px solid rgba(255,232,225,.2);box-shadow:0 35px 100px rgba(10,0,6,.34)!important;border-radius:26px;}
+.login-brand{position:relative;overflow:hidden;background:linear-gradient(145deg,#550018,#870029)!important;}
+.login-brand::after{content:"";position:absolute;right:-110px;bottom:-125px;width:330px;height:330px;border-radius:50%;border:1px solid rgba(255,221,167,.22);box-shadow:0 0 0 42px rgba(255,255,255,.035),0 0 0 90px rgba(255,255,255,.025);pointer-events:none;}
+.login-card{background:#fff!important;}
+.login-card h2{letter-spacing:-.045em;}
+.primary-btn{box-shadow:0 8px 22px rgba(128,0,32,.17);}
+@media(max-width:850px){.sidebar{width:225px}.main{margin-left:225px;width:calc(100% - 225px);padding:22px 18px 42px}.sidebar-brand h2{font-size:19px}}
+@media(max-width:650px){.sidebar{width:100%;height:auto;position:relative;min-height:0;padding:13px 12px;box-shadow:none}.sidebar-brand{margin-bottom:8px;padding:6px 5px 12px}.sidebar nav{display:flex;flex-direction:row;overflow-x:auto;padding:4px 0 7px}.sidebar .nav-item{white-space:nowrap;flex-shrink:0;padding:11px 13px}.sidebar .logout-btn{margin-top:8px}.main{margin-left:0;width:100%;padding:20px 15px 40px}.topbar{flex-wrap:wrap}.topbar h1{font-size:30px}}
+@media(prefers-reduced-motion:reduce){.page-section.active,.welcome-card::after{animation:none!important}:is(.stat-card,.teacher-card):hover,.sidebar .nav-item:hover{transform:none}}
+
+/* Aurora refinement: intact rounded login panel and original transparent crest */
+.login-container {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 26px;
+  width: min(900px, calc(100vw - 36px));
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,220,224,.35);
+}
+/* Keep both moving light trails INSIDE the rounded panel, never detached. */
+.login-container::before,
+.login-container::after {
+  inset: 0;
+  border-radius: inherit;
+  padding: 3px;
+  z-index: 5;
+}
+.login-container::before {filter:none;}
+.login-container::after {filter:none;}
+.login-brand,
+.login-card {min-width:0;box-sizing:border-box;}
+.login-brand {border-radius:0;}
+.login-card {border-radius:0;}
+.login-brand .school-logo,
+.login-brand .school-logo img {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.login-brand .school-logo {
+  width: 100px;
+  height: 100px;
+  padding: 0;
+  display: block;
+  flex-shrink: 0;
+}
+.login-brand .school-logo img {display:block;width:100%;height:100%;object-fit:contain;}
+.sidebar-brand .mini-logo,
+.sidebar-brand img {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  object-fit: contain !important;
+}
+@media(max-width:700px){
+  .login-container{grid-template-columns:1fr;width:min(540px,calc(100vw - 28px));}
+  .login-brand,.login-card{border-radius:0!important;}
+  .login-brand{padding:32px 28px;}
+}
+@media(max-width:380px){.login-brand,.login-card{padding-left:20px;padding-right:20px;}}
+
+
+/* Aurora final polish: aligned rounded edges, no detached neon corners. */
+.login-container {
+  position: relative;
+  width: min(900px, calc(100% - 32px));
+  max-width: 900px;
+  margin-inline: auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 211, 222, .42);
+  box-shadow: 0 28px 75px rgba(15,0,9,.32), 0 0 0 1px rgba(255,255,255,.06);
+}
+/* Replace the old masked orbit lines: clean, continuous inset perimeter glow. */
+.login-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(from var(--neon-angle),
+    rgba(255,184,206,.15) 0deg, #ff9ab7 26deg, #e71d60 47deg,
+    rgba(255,184,206,.15) 76deg, rgba(255,184,206,.13) 170deg,
+    #ffb1c5 205deg, #e00048 226deg, rgba(255,184,206,.15) 260deg,
+    rgba(255,184,206,.15) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: none;
+  animation: twoNeonOrbit 7s linear infinite;
+  pointer-events: none;
+}
+.login-container::after { content: none !important; }
+.login-brand, .login-card { min-width: 0; border-radius: 0 !important; }
+.login-brand { overflow: hidden; }
+.login-brand .school-logo,
+.login-brand .school-logo img,
+.sidebar-brand .mini-logo,
+.sidebar-brand img {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  object-fit: contain !important;
+}
+.sidebar-brand .mini-logo { flex-shrink: 0; width: 52px; height: 52px; }
+.login-brand .school-logo { width: 100px; height: 100px; }
+.login-brand .school-logo img { display:block; width:100%; height:100%; }
+@media (max-width: 700px) {
+  .login-container { width: min(540px, calc(100% - 24px)); grid-template-columns: 1fr; }
+  .login-brand, .login-card { border-radius: 0 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-container::before { animation: none !important; }
+}
