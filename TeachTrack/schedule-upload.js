@@ -151,29 +151,35 @@ async function loadTeacher(){
  if(!state.teacherId)return;
  try{
   const [draft,active]=await Promise.all([getDoc(doc(db,'termScheduleDrafts',state.teacherId)),getDoc(doc(db,'schedules',state.teacherId))]);
-  const data=draft.exists()?draft.data():active.exists()?active.data():null;
-  if(data){state.term=data.term||'';state.termStart=data.termStart||'';state.termEnd=data.termEnd||'';state.entries=Array.isArray(data.entries)?data.entries.map(normalizeEntry):Array.isArray(data.rows)?legacyRowsToEntries(data.rows):DAYS.flatMap(day=>(data[day]||[]).map(e=>normalizeEntry({...e,day,kind:e.kind||'class'})));status(draft.exists()?'Saved draft loaded.':'Approved schedule loaded. Changes will be a separate draft.');}
+  const useDraft=!adminPage&&draft.exists();const data=useDraft?draft.data():active.exists()?active.data():draft.exists()?draft.data():null;
+  if(data){state.term=data.term||'';state.termStart=data.termStart||'';state.termEnd=data.termEnd||'';state.entries=Array.isArray(data.entries)?data.entries.map(normalizeEntry):Array.isArray(data.rows)?legacyRowsToEntries(data.rows):DAYS.flatMap(day=>(data[day]||[]).map(e=>normalizeEntry({...e,day,kind:e.kind||'class'})));status(useDraft||(!active.exists()&&draft.exists())?'Saved draft loaded.':'Approved schedule loaded.');}
   else{state.term='';state.termStart='';state.termEnd='';state.entries=[];status('Ready for a new semester timetable.');}
   sortEntries();$('ttTerm').value=state.term;$('ttStart').value=state.termStart;$('ttEnd').value=state.termEnd;resetEditor();paint();
  }catch(e){status('Unable to load teacher schedule: '+e.message,true);}
 }
 async function saveDraft(){try{readForm();validateEntries();const rows=entriesToLegacyRows();if(rows.length>100)throw Error('Too many distinct time boundaries (maximum 100).');await setDoc(doc(db,'termScheduleDrafts',state.teacherId),{teacherId:state.teacherId,term:state.term,termStart:state.termStart,termEnd:state.termEnd,rows,updatedBy:state.user.uid,updatedAt:serverTimestamp()});status('Draft saved online. Approved timetable remains unchanged.');}catch(e){status('Draft not saved: '+e.message,true);}}
-async function submit(){try{readForm();validateEntries();if(!confirm(adminPage?'Approve and activate this semester schedule?':'Submit this semester schedule for admin approval?'))return;const data={teacherId:state.teacherId,term:state.term,termStart:state.termStart,termEnd:state.termEnd,rows:state.entries.map(e=>({...e,kind:e.kind})),status:adminPage?'approved':'pending',submittedBy:state.user.uid,submittedAt:serverTimestamp(),fileName:'TeachTrack timetable editor',fileType:'manual-grid'};if(adminPage){
-  // Administrator approval is direct: do not create a pending submission.
-  const activationId='admin-'+Date.now();
-  await activate(activationId,data);
-  // Keep the editor in sync with the approved timetable on reload.
-  await setDoc(doc(db,'termScheduleDrafts',state.teacherId),{
-    teacherId:state.teacherId,term:state.term,termStart:state.termStart,
-    termEnd:state.termEnd,rows:entriesToLegacyRows(),
-    updatedBy:state.user.uid,updatedAt:serverTimestamp()
-  });
-  status('Schedule approved and activated for the selected teacher. It is now their active timetable.');
- }else{
-  await addDoc(collection(db,'termScheduleSubmissions'),data);
-  status('Submitted for approval. Existing approved schedule remains unchanged.');
- }
- await refresh();}catch(e){status('Submission failed: '+e.message,true);}}
+async function submit(){
+ try{
+  readForm();
+  validateEntries();
+  if(!confirm(adminPage?'Approve and activate this semester schedule?':'Submit this semester schedule for admin approval?'))return;
+  const data={teacherId:state.teacherId,term:state.term,termStart:state.termStart,termEnd:state.termEnd,rows:state.entries.map(e=>({...e,kind:e.kind})),status:adminPage?'approved':'pending',submittedBy:state.user.uid,submittedAt:serverTimestamp(),fileName:'TeachTrack timetable editor',fileType:'manual-grid'};
+  if(adminPage){
+   const activationId='admin-'+Date.now();
+   await activate(activationId,data);
+   const saved=await getDoc(doc(db,'schedules',state.teacherId));
+   if(!saved.exists())throw Error('The active schedule could not be verified after saving.');
+   const persisted=saved.data();
+   const savedCount=DAYS.reduce((n,day)=>n+(Array.isArray(persisted[day])?persisted[day].length:0),0);
+   if(savedCount!==state.entries.length)throw Error('Schedule verification failed. Please try again.');
+   status('Schedule activated and verified online. '+savedCount+' blocks saved.');
+  }else{
+   await addDoc(collection(db,'termScheduleSubmissions'),data);
+   status('Submitted for approval. Existing approved schedule remains unchanged.');
+  }
+  await refresh();
+ }catch(e){status('Activation/submission failed: '+e.message,true);}
+}
 async function activate(id,data){const days=Object.fromEntries(DAYS.map(d=>[d,[]]));for(const e of data.rows){if(!days[e.day])continue;days[e.day].push({start:e.start,end:e.end,subject:e.subject||e.kind,section:e.section||'',kind:e.kind});}const active={teacherId:data.teacherId,...days,term:data.term,termStart:data.termStart,termEnd:data.termEnd,sourceSubmissionId:id,updatedAt:serverTimestamp()};await setDoc(doc(db,'teacherTermSchedules',data.teacherId,'terms',id),active);await setDoc(doc(db,'schedules',data.teacherId),active);}
 async function refresh(){const holder=$('ttSubmissions');if(!holder)return;holder.replaceChildren();try{const q=adminPage?query(collection(db,'termScheduleSubmissions'),where('status','==','pending')):query(collection(db,'termScheduleSubmissions'),where('teacherId','==',state.user.uid));const snap=await getDocs(q);if(snap.empty){holder.textContent='No submissions to display.';return;}for(const d of snap.docs){const v=d.data(),card=document.createElement('div');card.className='tt-submission-card';const name=state.teachers.find(t=>t.id===v.teacherId)?.name||v.teacherId;card.innerHTML=`<strong>${esc(adminPage?name+' · '+v.term:v.term)}</strong> · ${esc(v.termStart)} - ${esc(v.termEnd)} · ${esc(v.status)} · ${v.rows?.length||0} blocks`;const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Review timetable';details.append(summary);const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=(v.rows||[]).map(r=>`${r.day} ${clock(r.start)} – ${clock(r.end)}: ${r.kind||'class'} ${r.subject||''} ${r.section||''}`).join('\n');details.append(pre);card.append(details);if(adminPage){const approve=document.createElement('button');approve.textContent='Approve & activate';approve.onclick=async()=>{if(!confirm('Approve this teacher timetable?'))return;approve.disabled=true;try{await activate(d.id,v);await updateDoc(d.ref,{status:'approved',reviewedBy:state.user.uid,reviewedAt:serverTimestamp()});await refresh();status('Approved.');}catch(e){status(e.message,true);approve.disabled=false;}};const reject=document.createElement('button');reject.textContent='Reject';reject.onclick=async()=>{const note=prompt('Reason for rejection:');if(note===null)return;try{await updateDoc(d.ref,{status:'rejected',reviewNote:note,reviewedBy:state.user.uid,reviewedAt:serverTimestamp()});await refresh();}catch(e){status(e.message,true);}};card.append(approve,reject);}holder.append(card);}}catch(e){holder.textContent='Unable to load submissions: '+e.message;}}
 async function init(user){
