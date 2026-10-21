@@ -1039,7 +1039,7 @@ async function acceptRequest(requestId) {
         );
 
         alert(
-            "Unable to accept the request."
+            "Unable to accept the request: " + (error?.message || "Unknown error")
         );
 
     }
