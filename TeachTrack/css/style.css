@@ -2425,3 +2425,71 @@ input:focus,select:focus,textarea:focus{border-color:#a13b5d;box-shadow:0 0 0 4p
 @media (prefers-reduced-motion: reduce) {
   .login-container::before { animation: none !important; }
 }
+
+
+/* Monthly Records — accessible, aligned, horizontally scrollable table */
+#monthlyRecords.records-table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(110, 24, 54, .12);
+  background: #fff;
+  -webkit-overflow-scrolling: touch;
+}
+#monthlyRecords.records-table table {
+  width: 100%;
+  min-width: 1050px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+  background: #fff;
+  color: #30242a;
+}
+#monthlyRecords.records-table th,
+#monthlyRecords.records-table td {
+  box-sizing: border-box;
+  padding: 16px 18px;
+  text-align: left;
+  vertical-align: middle;
+  line-height: 1.45;
+  border-bottom: 1px solid #f0e4e9;
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
+}
+#monthlyRecords.records-table th {
+  background: #800020;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+#monthlyRecords.records-table td { font-size: 14px; }
+#monthlyRecords.records-table th:nth-child(1),
+#monthlyRecords.records-table td:nth-child(1) { width: 15%; }
+#monthlyRecords.records-table th:nth-child(2),
+#monthlyRecords.records-table td:nth-child(2) { width: 18%; }
+#monthlyRecords.records-table th:nth-child(3),
+#monthlyRecords.records-table td:nth-child(3) { width: 18%; }
+#monthlyRecords.records-table th:nth-child(4),
+#monthlyRecords.records-table td:nth-child(4) { width: 10%; }
+#monthlyRecords.records-table th:nth-child(5),
+#monthlyRecords.records-table td:nth-child(5) { width: 17%; }
+#monthlyRecords.records-table th:nth-child(6),
+#monthlyRecords.records-table td:nth-child(6) { width: 10%; }
+#monthlyRecords.records-table th:nth-child(7),
+#monthlyRecords.records-table td:nth-child(7) { width: 12%; }
+#monthlyRecords.records-table tbody tr:nth-child(even) { background: #fcf8fa; }
+#monthlyRecords.records-table tbody tr:hover { background: #fff4f7; }
+#monthlyRecords.records-table tbody tr:last-child td { border-bottom: 0; }
+#monthlyRecords.records-table td:nth-child(5) { white-space: nowrap; }
+#monthlyRecords.records-table td:nth-child(6) { font-weight: 700; color: #800020; }
+@media (max-width: 768px) {
+  #monthlyRecords.records-table th,
+  #monthlyRecords.records-table td { padding: 13px 14px; }
+}
