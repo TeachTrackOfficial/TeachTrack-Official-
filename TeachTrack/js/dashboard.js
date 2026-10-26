@@ -4285,6 +4285,13 @@ async function loadMonthlyRecords() {
         });
 
 
+        const pending = records.filter(r => r.status === "pending").length;
+        const review = records.filter(r => r.status === "declined_pending_review").length;
+        const pendingEl = document.getElementById("pendingRequests");
+        const reviewEl = document.getElementById("reviewRequests");
+        if (pendingEl) pendingEl.textContent = String(pending);
+        if (reviewEl) reviewEl.textContent = String(review);
+
         const totalElement =
             document.getElementById(
                 "totalRequests"
@@ -4827,3 +4834,17 @@ function escapeHTML(
         );
 
 }
+// Print only the selected admin monthly report, not the navigation/dashboard.
+document.getElementById('printAdminRecords')?.addEventListener('click', () => {
+  const month = document.getElementById('recordMonth')?.value || '';
+  const stats = ['totalRequests','acceptedRequests','declinedRequests','pendingRequests','reviewRequests'].map(id => document.getElementById(id)?.textContent || '0');
+  const table = document.querySelector('#monthlyRecords table');
+  const empty = document.getElementById('monthlyRecords')?.textContent?.trim() || 'No records';
+  const report = document.getElementById('tt-print-report') || document.createElement('div');
+  report.id = 'tt-print-report'; report.className = 'tt-print-report';
+  report.innerHTML = `<h1>TeachTrack | Monthly Substitute Activity</h1><p>Reporting month: ${month}</p><p>Total: ${stats[0]} · Accepted: ${stats[1]} · Declined / under review: ${stats[2]} · Pending: ${stats[3]} · Awaiting review: ${stats[4]}</p>`;
+  if (table) report.appendChild(table.cloneNode(true));
+  else { const message=document.createElement('p'); message.textContent=empty; report.appendChild(message); }
+  document.body.appendChild(report);
+  window.print();
+});

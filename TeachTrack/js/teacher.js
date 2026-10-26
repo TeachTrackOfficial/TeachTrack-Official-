@@ -263,6 +263,10 @@ function updatePageTitle(section) {
                 "My Schedule";
             break;
 
+        case "myMonthlyRecords":
+            pageTitle.textContent = "My Monthly Records";
+            break;
+
         case "substituteRequests":
             pageTitle.textContent =
                 "Substitute Requests";
