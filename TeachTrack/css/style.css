@@ -2493,3 +2493,29 @@ input:focus,select:focus,textarea:focus{border-color:#a13b5d;box-shadow:0 0 0 4p
   #monthlyRecords.records-table th,
   #monthlyRecords.records-table td { padding: 13px 14px; }
 }
+
+/* Monthly reports: readable tables, individual teacher views, and printable reports */
+.report-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:20px 0 14px}
+.report-note{font-size:14px;color:#69616a;margin:0;max-width:680px}
+.report-print-btn{background:#800020;color:white;border:0;border-radius:12px;padding:13px 20px;font-weight:700;cursor:pointer}
+.report-print-btn:hover{background:#5b0017}.report-print-btn:disabled{opacity:.5;cursor:not-allowed}
+.report-extra-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:14px 0}
+.records-table{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.records-table table{border-collapse:separate;border-spacing:0;width:100%;min-width:1040px;table-layout:auto}
+.records-table th,.records-table td{padding:13px 16px;text-align:left;vertical-align:top;white-space:normal;overflow-wrap:break-word;min-width:110px}
+.records-table th{white-space:nowrap;background:#800020;color:white;font-weight:700}
+.records-table tbody tr:nth-child(even){background:#f8f2f4}
+.records-table tbody td{border-bottom:1px solid #e7dce0}
+.tt-print-report{display:none}
+@media(max-width:700px){.report-extra-stats{grid-template-columns:1fr 1fr}.report-toolbar{align-items:stretch}.report-print-btn{width:100%}}
+@media print{
+ @page{size:landscape;margin:12mm}
+ body>*:not(.tt-print-report){display:none!important}
+ .tt-print-report{display:block!important;font:11px/1.4 Arial,sans-serif;color:#111;background:white}
+ .tt-print-report h1{font-size:19px;margin:0 0 8px}
+ .tt-print-report p{margin:0 0 14px}
+ .tt-print-report table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px}
+ .tt-print-report th,.tt-print-report td{border:1px solid #bbb;padding:6px;vertical-align:top;overflow-wrap:anywhere;text-align:left}
+ .tt-print-report th{background:#eee!important;color:#111!important}
+ .tt-print-report tr{break-inside:avoid}
+}
