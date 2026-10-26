@@ -79,6 +79,8 @@
                 📩 Substitute Requests
             </button>
 
+            <button class="nav-item" data-section="myMonthlyRecords">📊 My Monthly Records</button>
+
         </nav>
 
 
@@ -265,7 +267,19 @@
 
         </section>
 
-    </main>
+    <section id="myMonthlyRecords" class="page-section">
+  <div class="section-header"><div><h2 class="section-title">My Monthly Records</h2><p>Only your substitute assignments and requests involving you are shown.</p></div>
+    <input type="month" id="teacherRecordMonth" class="month-input" aria-label="Select report month"></div>
+  <div class="stats-grid teacher-report-stats">
+    <div class="stat-card"><span>Total</span><strong id="teacherRecordTotal">0</strong></div>
+    <div class="stat-card"><span>Accepted</span><strong id="teacherRecordAccepted">0</strong></div>
+    <div class="stat-card"><span>Declined / under review</span><strong id="teacherRecordDeclined">0</strong></div>
+    <div class="stat-card"><span>Pending</span><strong id="teacherRecordPending">0</strong></div>
+  </div>
+  <div class="report-toolbar"><p class="report-note">Monthly activity based on request date. Declines awaiting review are counted separately in the table.</p><button type="button" id="printTeacherRecords" class="report-print-btn" disabled>🖨 Print my report</button></div>
+  <div id="teacherMonthlyRecords" class="records-table">Choose My Monthly Records to load your report.</div>
+</section>
+</main>
 
 </div>
 
@@ -352,6 +366,7 @@ document.querySelectorAll('.sidebar .nav-item[data-section]').forEach(button => 
 });
 </script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script type="module" src="js/teacher-monthly-records.js"></script>
 <script type="module" src="js/schedule-upload.js?v=20261011-syntax-repair-2"></script>
 </body>
 
