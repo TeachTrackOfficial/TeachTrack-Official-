@@ -45,7 +45,7 @@ if(!user)return fail(res,401,'Please sign in');
 if(action==='logout'){await pool.query('update tt_users set session_id=null where id=$1',[user.id]);res.setHeader('Set-Cookie','tt_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');return res.json({ok:true})}
 if(action==='createTeacher'){if(user.role!=='admin')return fail(res,403,'Admin only');if(!/^[a-zA-Z0-9_.-]{3,40}$/.test(username||'')||typeof password!=='string'||password.length<10)return fail(res,400,'Invalid username or password (minimum 10 characters)');const id=randomUUID();await pool.query('insert into tt_users(id,username,password_hash,role,name) values($1,$2,$3,$4,$5)',[id,username,hash(password),'teacher',username]);await pool.query('insert into tt_documents(path,collection,data) values($1,$2,$3)', ['users/'+id,'users',JSON.stringify({name:username,email:username,role:'teacher'})]);return res.json({user:{uid:id,email:username,username}})}
 const seg=parse(path);const write=['set','update','add'].includes(action);
-if(!allowed(user,seg,write,data))return fail(res,403,'Access denied');
+if(!(write && seg[0]==='substituteRequests' && user.role==='teacher') && !allowed(user,seg,write,data))return fail(res,403,'Access denied');
 if(action==='get'){const r=await pool.query('select data from tt_documents where path=$1',[path]);if(seg[0]==='users'&&seg[1]===user.id&&!r.rows.length)return res.json({data:{name:user.name,email:user.username,role:user.role}});return res.json({data:r.rows[0]?.data??null})}
 if(action==='list'){if(seg.length!==1&&!(seg.length===3&&seg[0]==='teacherTermSchedules'))return fail(res,400,'Invalid collection');let rows=(await pool.query('select path,data from tt_documents where collection=$1',[path])).rows;if(user.role!=='admin'){rows=rows.filter(x=>{const d=x.data;return (seg[0]==='substituteRequests'&&(d.assignedTeacherId===user.id||d.requestedBy===user.id))||(seg[0]==='termScheduleSubmissions'&&d.teacherId===user.id)||(seg[0]==='schedules'&&x.path.endsWith('/'+user.id))||(seg[0]==='termScheduleDrafts'&&x.path.endsWith('/'+user.id))||(seg[0]==='teacherTermSchedules'&&x.path.includes('/'+user.id+'/'))})}if(seg[0]==='users'&&user.role==='admin'){const users=(await pool.query('select id,username,role,name from tt_users where enabled=true')).rows;rows=users.map(u=>({path:'users/'+u.id,data:{...rows.find(x=>x.path==='users/'+u.id)?.data,name:u.name,email:u.username,role:u.role}}))}for(const f of filters){if(f.operator!=='==')return fail(res,400,'Unsupported filter');rows=rows.filter(x=>x.data?.[f.field]===f.value)}return res.json({docs:rows})}
 if(!write)return fail(res,400,'Unknown action');
@@ -57,6 +57,19 @@ if(typeof data!=='object'||!data||Array.isArray(data))return fail(res,400,'Inval
 // Teachers cannot approve schedules, impersonate other users or change their own role.
 if(user.role!=='admin'&&((seg[0]==='termScheduleSubmissions'&&data.status!=='pending')||(seg[0]==='substituteRequests'&&data.status==='approved')))return fail(res,403,'Admin approval required');
 const previous=(await pool.query('select data from tt_documents where path=$1',[full])).rows[0]?.data||{};
+// Authorize teacher responses against the stored assignment, not partial update fields.
+if(user.role==='teacher' && seg[0]==='substituteRequests'){
+  if(action!=='update' || seg.length!==2 || !Object.keys(previous).length || previous.assignedTeacherId!==user.id)
+    return fail(res,403,'Access denied');
+  const permitted=['status','respondedAt','declineReason'];
+  if(!data || typeof data!=='object' || Object.keys(data).some(k=>!permitted.includes(k)))
+    return fail(res,403,'Only a response to your assigned request is permitted');
+  if(!['accepted','declined_pending_review'].includes(data.status) || !['pending','sent','assigned'].includes(previous.status))
+    return fail(res,409,'Request is not awaiting a response');
+  if(data.status==='declined_pending_review' && (typeof data.declineReason!=='string' || !data.declineReason.trim()))
+    return fail(res,400,'Decline reason required');
+}
+
 const next=(action==='update'||merge)?{...previous,...data}:data;
 for(const [k,v] of Object.entries(next)){if(v&&typeof v==='object'&&Array.isArray(v.__arrayUnion))next[k]=[...new Set([...(Array.isArray(previous[k])?previous[k]:[]),...v.__arrayUnion])];}
 await pool.query('insert into tt_documents(path,collection,data) values($1,$2,$3) on conflict(path) do update set data=excluded.data',[full,action==='add'?path:seg.slice(0,-1).join('/'),JSON.stringify(next)]);
