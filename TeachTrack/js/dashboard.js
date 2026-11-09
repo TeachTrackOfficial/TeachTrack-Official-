@@ -3821,6 +3821,69 @@ async function cancelDeclinedRequest(requestId) {
     }
 }
 
+
+function openDeclineRejectionDialog() {
+    return new Promise((resolve) => {
+        document.getElementById("tt-review-overlay")?.remove();
+        const overlay = document.createElement("div");
+        overlay.id = "tt-review-overlay";
+        overlay.innerHTML = `
+          <section class="tt-review-dialog" role="dialog" aria-modal="true" aria-labelledby="tt-review-title">
+            <header class="tt-review-header">
+              <div><h2 id="tt-review-title">Reject Decline Request</h2>
+              <p>Please provide a clear explanation for rejecting the teacher's decline reason.</p></div>
+              <button type="button" class="tt-review-close" aria-label="Close">&times;</button>
+            </header>
+            <form class="tt-review-form">
+              <label for="tt-review-reason">Reason for rejection <span>*</span></label>
+              <textarea id="tt-review-reason" maxlength="1000" rows="5" placeholder="Enter your explanation here..." required></textarea>
+              <p class="tt-review-hint">The teacher will see this explanation and can respond to the request again.</p>
+              <p class="tt-review-error" role="alert" hidden>Please enter a reason for rejection.</p>
+              <footer class="tt-review-actions"><button type="button" class="tt-review-cancel">Cancel</button><button type="submit" class="tt-review-submit">Reject Decline</button></footer>
+            </form>
+          </section>`;
+        const style = document.createElement("style");
+        style.textContent = `
+          #tt-review-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(33,20,30,.62);box-sizing:border-box}
+          #tt-review-overlay *{box-sizing:border-box}
+          .tt-review-dialog{background:white;color:#30262c;width:min(100%,540px);max-height:calc(100vh - 40px);overflow:auto;border-radius:18px;padding:28px;box-shadow:0 18px 65px rgba(0,0,0,.24);font-family:inherit}
+          .tt-review-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+          .tt-review-header h2{margin:0 0 8px;color:#650c2f;font-size:22px;font-weight:750}
+          .tt-review-header p{margin:0 0 24px;color:#675c64;font-size:14px;line-height:1.55}
+          .tt-review-close{border:0;background:transparent;color:#756873;font-size:27px;cursor:pointer;line-height:1;padding:0 4px}
+          .tt-review-form label{display:block;font-size:14px;font-weight:650;margin-bottom:9px}
+          .tt-review-form label span{color:#c62828}
+          #tt-review-reason{display:block;width:100%;min-height:125px;resize:vertical;padding:13px;border:1px solid #d8cbd2;border-radius:10px;background:white;color:#30262c;font:inherit;font-size:14px;outline:none}
+          #tt-review-reason:focus{border-color:#842449;box-shadow:0 0 0 3px rgba(132,36,73,.13)}
+          .tt-review-hint{margin:9px 0 0;color:#726670;font-size:12px;line-height:1.5}
+          .tt-review-error{margin:8px 0 0;color:#b91c1c;font-size:13px}
+          .tt-review-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px}
+          .tt-review-actions button{font:inherit;font-size:14px;font-weight:650;border-radius:9px;padding:11px 18px;cursor:pointer}
+          .tt-review-cancel{background:white;color:#46343f;border:1px solid #d7cbd1}
+          .tt-review-submit{background:#782044;color:white;border:1px solid #782044}
+          .tt-review-submit:hover{background:#621635}
+          @media(max-width:480px){.tt-review-dialog{padding:20px}.tt-review-actions{flex-direction:column-reverse}.tt-review-actions button{width:100%}}
+        `;
+        overlay.appendChild(style);
+        document.body.appendChild(overlay);
+        const textarea = overlay.querySelector("textarea");
+        const close = (value) => { document.removeEventListener("keydown", onKey); overlay.remove(); resolve(value); };
+        const onKey = (event) => { if (event.key === "Escape") close(null); };
+        document.addEventListener("keydown", onKey);
+        overlay.querySelector(".tt-review-close").addEventListener("click", () => close(null));
+        overlay.querySelector(".tt-review-cancel").addEventListener("click", () => close(null));
+        overlay.addEventListener("click", (event) => { if (event.target === overlay) close(null); });
+        textarea.addEventListener("input", () => { overlay.querySelector(".tt-review-error").hidden = true; });
+        overlay.querySelector("form").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const reason = textarea.value.trim();
+            if (!reason) { overlay.querySelector(".tt-review-error").hidden = false; textarea.focus(); return; }
+            close(reason);
+        });
+        textarea.focus();
+    });
+}
+
 // Reject a teacher's decline reason without accepting the assignment for them.
 // The request returns to pending so the assigned teacher can respond again.
 async function rejectDeclineReview(requestId) {
@@ -3828,9 +3891,8 @@ async function rejectDeclineReview(requestId) {
         alert("Administrator access is required.");
         return;
     }
-    const explanation = window.prompt("Why is the decline reason invalid? This explanation will be visible to the teacher:");
-    if (explanation === null) return;
-    const reason = explanation.trim();
+    const reason = await openDeclineRejectionDialog();
+    if (reason === null) return;
     if (!reason) {
         alert("Please enter a reason for rejecting the decline.");
         return;
@@ -3839,7 +3901,6 @@ async function rejectDeclineReview(requestId) {
         alert("Please keep the explanation under 1,000 characters.");
         return;
     }
-    if (!window.confirm("Reject this decline reason and ask the teacher to respond again?")) return;
     try {
         const requestRef = doc(db, "substituteRequests", requestId);
         const snapshot = await getDoc(requestRef);
