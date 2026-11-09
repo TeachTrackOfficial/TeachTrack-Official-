@@ -3751,12 +3751,8 @@ function createDeclineReviewCard(
 
         <div class="request-actions">
 
-            <button
-                class="primary-btn confirm-decline-btn"
-                type="button"
-            >
-                Confirm Decline
-            </button>
+            <button class="primary-btn confirm-decline-btn" type="button">Confirm Decline</button>
+            <button class="secondary-btn reject-decline-btn" type="button" style="margin-left:10px;background:#6b3342;color:white;padding:11px 16px;border:0;border-radius:9px;cursor:pointer;">Reject Decline</button>
 
         </div>
 
@@ -3782,6 +3778,11 @@ function createDeclineReviewCard(
     }
 
 
+    const rejectButton = card.querySelector(".reject-decline-btn");
+    if (rejectButton) {
+        rejectButton.addEventListener("click", () => rejectDeclineReview(request.id));
+    }
+
     return card;
 
 }
@@ -3790,6 +3791,87 @@ function createDeclineReviewCard(
 // =====================================================
 // CONFIRM DECLINE
 // =====================================================
+
+async function cancelDeclinedRequest(requestId) {
+    if (!currentUser || !currentUserData || currentUserData.role !== "admin") {
+        alert("Administrator access is required.");
+        return;
+    }
+    if (!window.confirm("Cancel this substitute request? It will remain in monthly records as Cancelled and cannot be reassigned.")) return;
+    try {
+        const requestRef = doc(db, "substituteRequests", requestId);
+        const snapshot = await getDoc(requestRef);
+        if (!snapshot.exists() || snapshot.data().status !== "declined_pending_review") {
+            alert("This request is no longer awaiting decline review.");
+            await loadDeclineReviews();
+            return;
+        }
+        await updateDoc(requestRef, {
+            status: "cancelled",
+            cancelledBy: currentUser.uid,
+            cancelledAt: serverTimestamp(),
+            cancellationReason: "Cancelled by administrator after teacher decline"
+        });
+        await loadDeclineReviews();
+        await loadMonthlyRecords();
+        alert("Substitute request cancelled successfully.");
+    } catch (error) {
+        console.error("CANCEL REQUEST ERROR:", error);
+        alert("Unable to cancel request: " + (error.message || "Unknown error"));
+    }
+}
+
+// Reject a teacher's decline reason without accepting the assignment for them.
+// The request returns to pending so the assigned teacher can respond again.
+async function rejectDeclineReview(requestId) {
+    if (!currentUser || !currentUserData || currentUserData.role !== "admin") {
+        alert("Administrator access is required.");
+        return;
+    }
+    const explanation = window.prompt("Why is the decline reason invalid? This explanation will be visible to the teacher:");
+    if (explanation === null) return;
+    const reason = explanation.trim();
+    if (!reason) {
+        alert("Please enter a reason for rejecting the decline.");
+        return;
+    }
+    if (reason.length > 1000) {
+        alert("Please keep the explanation under 1,000 characters.");
+        return;
+    }
+    if (!window.confirm("Reject this decline reason and ask the teacher to respond again?")) return;
+    try {
+        const requestRef = doc(db, "substituteRequests", requestId);
+        const snapshot = await getDoc(requestRef);
+        if (!snapshot.exists() || snapshot.data().status !== "declined_pending_review") {
+            alert("This request is no longer awaiting decline review.");
+            await loadDeclineReviews();
+            return;
+        }
+        const existing = snapshot.data();
+        const history = Array.isArray(existing.declineReviewHistory) ? existing.declineReviewHistory : [];
+        await updateDoc(requestRef, {
+            status: "pending",
+            declineReviewStatus: "rejected",
+            declineRejectedReason: reason,
+            declineRejectedBy: currentUser.uid,
+            declineRejectedAt: serverTimestamp(),
+            declineReviewHistory: [...history, {
+                action: "rejected",
+                teacherReason: existing.declineReason || "",
+                adminReason: reason,
+                reviewedBy: currentUser.uid,
+                reviewedAt: new Date().toISOString()
+            }]
+        });
+        await loadDeclineReviews();
+        await loadMonthlyRecords();
+        alert("Decline reason rejected. The teacher can now respond again.");
+    } catch (error) {
+        console.error("Reject decline error:", error);
+        alert("Unable to reject decline: " + (error.message || "Unknown error"));
+    }
+}
 
 async function confirmDeclineReview(
     requestId
@@ -4834,17 +4916,43 @@ function escapeHTML(
         );
 
 }
-// Print only the selected admin monthly report, not the navigation/dashboard.
-document.getElementById('printAdminRecords')?.addEventListener('click', () => {
-  const month = document.getElementById('recordMonth')?.value || '';
-  const stats = ['totalRequests','acceptedRequests','declinedRequests','pendingRequests','reviewRequests'].map(id => document.getElementById(id)?.textContent || '0');
-  const table = document.querySelector('#monthlyRecords table');
-  const empty = document.getElementById('monthlyRecords')?.textContent?.trim() || 'No records';
-  const report = document.getElementById('tt-print-report') || document.createElement('div');
-  report.id = 'tt-print-report'; report.className = 'tt-print-report';
-  report.innerHTML = `<h1>TeachTrack | Monthly Substitute Activity</h1><p>Reporting month: ${month}</p><p>Total: ${stats[0]} · Accepted: ${stats[1]} · Declined / under review: ${stats[2]} · Pending: ${stats[3]} · Awaiting review: ${stats[4]}</p>`;
-  if (table) report.appendChild(table.cloneNode(true));
-  else { const message=document.createElement('p'); message.textContent=empty; report.appendChild(message); }
-  document.body.appendChild(report);
-  window.print();
+// Build a standalone print document to avoid hidden dashboard/ancestor CSS rules.
+document.getElementById('printAdminRecords')?.addEventListener('click', async () => {
+  const button = document.getElementById('printAdminRecords');
+  button.disabled = true;
+  try {
+    await loadMonthlyRecords();
+    const month = document.getElementById('recordMonth')?.value || 'All dates';
+    const ids = ['totalRequests','acceptedRequests','declinedRequests','pendingRequests','reviewRequests'];
+    const stats = ids.map(id => document.getElementById(id)?.textContent?.trim() || '0');
+    const source = document.querySelector('#monthlyRecords table');
+    const safeMonth = escapeHTML(month);
+    const content = source ? source.outerHTML : '<p>No substitute requests were recorded for this month.</p>';
+    const frame = document.createElement('iframe');
+    frame.setAttribute('title', 'Monthly report print');
+    frame.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;';
+    document.body.appendChild(frame);
+    const docPrint = frame.contentDocument;
+    docPrint.open();
+    docPrint.write(`<!doctype html><html><head><title>TeachTrack Monthly Report - ${safeMonth}</title><style>
+      @page{size:landscape;margin:12mm}body{font:12px Arial,sans-serif;color:#111}
+      h1{font-size:20px;margin:0 0 8px}p{margin:8px 0 16px}
+      table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:10px}
+      th,td{border:1px solid #aaa;padding:7px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+      th{background:#eee}tr{break-inside:avoid}
+      </style></head><body><h1>TeachTrack | Monthly Substitute Activity</h1>
+      <p><strong>Reporting month:</strong> ${safeMonth}</p>
+      <p>Total: ${stats[0]} | Accepted: ${stats[1]} | Declined / under review: ${stats[2]} | Pending: ${stats[3]} | Awaiting review: ${stats[4]}</p>
+      ${content}</body></html>`);
+    docPrint.close();
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+    // Keep the iframe available until the print dialog has finished.
+    frame.contentWindow.addEventListener('afterprint', () => frame.remove(), {once:true});
+  } catch (error) {
+    console.error('PRINT MONTHLY REPORT ERROR:', error);
+    alert('Could not prepare the monthly report: ' + error.message);
+  } finally {
+    button.disabled = false;
+  }
 });

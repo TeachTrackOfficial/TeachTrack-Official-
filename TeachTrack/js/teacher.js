@@ -949,6 +949,14 @@ function createRequestCard(request) {
 
         </div>
 
+        ${request.status === "pending" && request.declineReviewStatus === "rejected" ? `
+            <div class="decline-reason" style="border-left:4px solid #b91c1c;padding:12px;margin:12px 0;background:#fff1f2;">
+                <strong>Administrator rejected your decline reason</strong>
+                <p>${escapeHTML(request.declineRejectedReason || "Please review your response.")}</p>
+                <p>You can accept the assignment or submit a new decline reason.</p>
+            </div>
+        ` : ""}
+
         ${buttonsHTML}
 
     `;
