@@ -1,3 +1,27 @@
+
+// A request expires after its scheduled end time in Philippine school time.
+function ttRequestExpired(request) {
+    if (request.status !== "pending" || request.declineReviewStatus === "rejected") return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(request.date || "")) return false;
+    const time = String(request.endTime || "").trim();
+    const match = time.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+    if (!match) return false;
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+    if (match[3]) {
+        if (hour < 1 || hour > 12) return false;
+        hour = hour % 12 + (match[3].toUpperCase() === "PM" ? 12 : 0);
+    }
+    if (hour > 23 || minute > 59) return false;
+    const scheduledEndUTC = Date.parse(`${request.date}T${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}:00+08:00`);
+    return Number.isFinite(scheduledEndUTC) && Date.now() > scheduledEndUTC;
+}
+function ttIsUnanswered(request) {
+    return request.status === "not_accepted" ||
+        request.status === "expired" ||
+        ttRequestExpired(request);
+}
+
 import { auth, db } from "./teachtrack-client.js";
 
 import {
@@ -584,6 +608,9 @@ async function loadTeacherRequests() {
     const pendingContainer =
         document.getElementById("pendingRequests");
 
+    const declineHistoryContainer =
+        document.getElementById("declineHistory");
+
     if (!allRequestsContainer && !pendingContainer) {
         return;
     }
@@ -647,7 +674,7 @@ async function loadTeacherRequests() {
         const pendingRequests =
             requests.filter(
                 request =>
-                    request.status === "pending" && request.declineReviewStatus !== "rejected"
+                    request.status === "pending" && request.declineReviewStatus !== "rejected" && !ttIsUnanswered(request)
             );
 
         if (pendingContainer) {
@@ -680,9 +707,31 @@ async function loadTeacherRequests() {
         // ALL REQUESTS
         // =============================================
 
-        if (allRequestsContainer) {
+        if (declineHistoryContainer) {
+            const declineHistory = requests.filter(request =>
+                request.status === "declined" ||
+                request.status === "declined_pending_review" ||
+                request.declineReviewStatus === "rejected"
+            );
+            declineHistoryContainer.innerHTML = "";
+            if (declineHistory.length === 0) {
+                declineHistoryContainer.innerHTML = `<div class="no-data">No decline history yet.</div>`;
+            } else {
+                declineHistory.forEach(request =>
+                    declineHistoryContainer.appendChild(createRequestCard(request))
+                );
+            }
+        }
 
-            if (requests.length === 0) {
+        if (allRequestsContainer) {
+            const activeRequests = requests.filter(request =>
+                request.status !== "declined" &&
+                request.status !== "declined_pending_review" &&
+                request.declineReviewStatus !== "rejected" &&
+                !ttIsUnanswered(request)
+            );
+
+            if (activeRequests.length === 0) {
 
                 allRequestsContainer.innerHTML =
                     `<div class="no-data">
@@ -693,7 +742,7 @@ async function loadTeacherRequests() {
 
                 allRequestsContainer.innerHTML = "";
 
-                requests.forEach(request => {
+                activeRequests.forEach(request => {
 
                     allRequestsContainer.appendChild(
                         createRequestCard(request)
@@ -717,7 +766,7 @@ async function loadTeacherRequests() {
             : error.code === "unavailable"
                 ? "Can't connect to Firebase right now. Check your internet connection and try again."
                 : "Unable to load requests. Please try again or check the browser console.";
-        for (const container of [allRequestsContainer, pendingContainer]) {
+        for (const container of [allRequestsContainer, pendingContainer, declineHistoryContainer]) {
             if (!container) continue;
             container.textContent = "";
             const message = document.createElement("p");

@@ -1,3 +1,27 @@
+
+// A request expires after its scheduled end time in Philippine school time.
+function ttRequestExpired(request) {
+    if (request.status !== "pending" || request.declineReviewStatus === "rejected") return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(request.date || "")) return false;
+    const time = String(request.endTime || "").trim();
+    const match = time.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+    if (!match) return false;
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+    if (match[3]) {
+        if (hour < 1 || hour > 12) return false;
+        hour = hour % 12 + (match[3].toUpperCase() === "PM" ? 12 : 0);
+    }
+    if (hour > 23 || minute > 59) return false;
+    const scheduledEndUTC = Date.parse(`${request.date}T${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}:00+08:00`);
+    return Number.isFinite(scheduledEndUTC) && Date.now() > scheduledEndUTC;
+}
+function ttIsUnanswered(request) {
+    return request.status === "not_accepted" ||
+        request.status === "expired" ||
+        ttRequestExpired(request);
+}
+
 import { evaluateAvailability } from "./availability-core.mjs";
 import {
     auth,
@@ -2653,7 +2677,7 @@ async function loadTeacherRequests() {
 
             if (
                 request.status ===
-                "pending"
+                "pending" && !ttIsUnanswered(request)
             ) {
 
                 pendingCount++;
@@ -4344,6 +4368,13 @@ async function loadMonthlyRecords() {
         monthInput?.value || "";
 
 
+    if (!document.getElementById("tt-show-unanswered")) {
+        const control = document.createElement("label");
+        control.style.cssText = "display:flex;align-items:center;gap:9px;margin:12px 0;font-size:14px;font-weight:600;color:#67213f;";
+        control.innerHTML = '<input type="checkbox" id="tt-show-unanswered" style="width:17px;height:17px;accent-color:#782044;"> Include Not Accepted (No Response) requests';
+        container.parentElement.insertBefore(control, container);
+        control.querySelector("input").addEventListener("change", loadMonthlyRecords);
+    }
     container.innerHTML = `
         <div class="loading">
             Loading monthly records...
@@ -4392,11 +4423,29 @@ async function loadMonthlyRecords() {
         });
 
 
+        // Persist expired pending requests so the status survives reloads.
+        for (const record of records) {
+            if (ttRequestExpired(record)) {
+                try {
+                    await updateDoc(doc(db, "substituteRequests", record.id), {
+                        status: "not_accepted",
+                        expiredAt: serverTimestamp()
+                    });
+                    record.status = "not_accepted";
+                } catch (error) {
+                    // Still display as expired even if the database denies the write.
+                    console.warn("Unable to persist expired request", record.id, error);
+                }
+            }
+        }
+        const showUnanswered = document.getElementById("tt-show-unanswered")?.checked || false;
+        const reportRecords = reportRecords.filter(r => showUnanswered || !ttIsUnanswered(r));
+
         let accepted = 0;
         let declined = 0;
 
 
-        records.forEach(record => {
+        reportRecords.forEach(record => {
 
             if (
                 record.status ===
@@ -4428,8 +4477,8 @@ async function loadMonthlyRecords() {
         });
 
 
-        const pending = records.filter(r => r.status === "pending").length;
-        const review = records.filter(r => r.status === "declined_pending_review").length;
+        const pending = reportRecords.filter(r => r.status === "pending").length;
+        const review = reportRecords.filter(r => r.status === "declined_pending_review").length;
         const pendingEl = document.getElementById("pendingRequests");
         const reviewEl = document.getElementById("reviewRequests");
         if (pendingEl) pendingEl.textContent = String(pending);
@@ -4456,7 +4505,7 @@ async function loadMonthlyRecords() {
         if (totalElement) {
 
             totalElement.textContent =
-                records.length;
+                reportRecords.length;
 
         }
 
@@ -4481,7 +4530,7 @@ async function loadMonthlyRecords() {
         // SORT RECORDS
         // =================================================
 
-        records.sort((a, b) => {
+        reportRecords.sort((a, b) => {
 
             const dateCompare =
                 a.date.localeCompare(
@@ -4510,7 +4559,7 @@ async function loadMonthlyRecords() {
 
 
         if (
-            records.length === 0
+            reportRecords.length === 0
         ) {
 
             container.innerHTML = `
@@ -4562,7 +4611,7 @@ async function loadMonthlyRecords() {
             );
 
 
-        records.forEach(record => {
+        reportRecords.forEach(record => {
 
             const row =
                 document.createElement(
