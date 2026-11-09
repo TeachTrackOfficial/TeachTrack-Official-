@@ -647,7 +647,7 @@ async function loadTeacherRequests() {
         const pendingRequests =
             requests.filter(
                 request =>
-                    request.status === "pending"
+                    request.status === "pending" && request.declineReviewStatus !== "rejected"
             );
 
         if (pendingContainer) {
@@ -753,7 +753,11 @@ function createRequestCard(request) {
     // PENDING
     // =============================================
 
-    if (request.status === "pending") {
+    if (request.status === "pending" && request.declineReviewStatus === "rejected") {
+
+        buttonsHTML = `<div class="request-actions"><span class="request-completed">Decision Finalized by Administrator</span></div>`;
+
+    } else if (request.status === "pending") {
 
         buttonsHTML = `
             <div class="request-actions">
@@ -953,7 +957,7 @@ function createRequestCard(request) {
             <div class="decline-reason" style="border-left:4px solid #b91c1c;padding:12px;margin:12px 0;background:#fff1f2;">
                 <strong>Administrator rejected your decline reason</strong>
                 <p>${escapeHTML(request.declineRejectedReason || "Please review your response.")}</p>
-                <p>You can accept the assignment or submit a new decline reason.</p>
+                <p>This decision has been finalized by the administrator. No further response is required.</p>
             </div>
         ` : ""}
 
