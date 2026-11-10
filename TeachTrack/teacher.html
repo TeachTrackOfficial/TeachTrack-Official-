@@ -81,10 +81,6 @@
 
             <button class="nav-item" data-section="myMonthlyRecords">📊 My Monthly Records</button>
 
-                    <button class="nav-item" data-section="unansweredHistorySection">
-                🕘 Not Accepted History
-            </button>
-
 </nav>
 
 
@@ -258,6 +254,11 @@
             </div>
 
 
+            <label for="includeUnansweredRequests" style="display:flex;align-items:center;gap:10px;margin:16px 0 20px;color:#70213f;font-weight:600;cursor:pointer;flex-wrap:wrap;">
+                <input type="checkbox" id="includeUnansweredRequests" style="width:18px;height:18px;accent-color:#80002b;cursor:pointer;">
+                Include Not Accepted (No Response) requests
+            </label>
+
             <div
                 id="allRequests"
                 class="request-list"
@@ -292,13 +293,6 @@
   <div class="report-toolbar"><p class="report-note">Monthly activity based on request date. Declines awaiting review are counted separately in the table.</p><button type="button" id="printTeacherRecords" class="report-print-btn" disabled>🖨 Print my report</button></div>
   <div id="teacherMonthlyRecords" class="records-table">Choose My Monthly Records to load your report.</div>
 </section>
-        <section id="unansweredHistorySection" class="page-section">
-            <h2 class="section-title">Not Accepted History</h2>
-            <p class="request-info">Substitute requests that passed their scheduled end time without an Accept or Decline response. These records are kept for reference.</p>
-            <div id="unansweredHistory" class="request-list">
-                <div class="loading">Loading unanswered requests...</div>
-            </div>
-        </section>
 
 </main>
 
