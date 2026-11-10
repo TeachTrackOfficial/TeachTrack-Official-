@@ -81,7 +81,11 @@
 
             <button class="nav-item" data-section="myMonthlyRecords">📊 My Monthly Records</button>
 
-        </nav>
+                    <button class="nav-item" data-section="unansweredHistorySection">
+                🕘 Not Accepted History
+            </button>
+
+</nav>
 
 
         <a
@@ -267,6 +271,15 @@
 
         </section>
 
+        <section id="declineHistorySection" class="page-section">
+            <h2 class="section-title">History of Declines</h2>
+            <p class="request-info">Declined requests and finalized administrator decisions are recorded here.</p>
+            <div id="declineHistory" class="request-list">
+                <div class="loading">Loading decline history...</div>
+            </div>
+        </section>
+
+
     <section id="myMonthlyRecords" class="page-section">
   <div class="section-header"><div><h2 class="section-title">My Monthly Records</h2><p>Only your substitute assignments and requests involving you are shown.</p></div>
     <input type="month" id="teacherRecordMonth" class="month-input" aria-label="Select report month"></div>
@@ -279,6 +292,14 @@
   <div class="report-toolbar"><p class="report-note">Monthly activity based on request date. Declines awaiting review are counted separately in the table.</p><button type="button" id="printTeacherRecords" class="report-print-btn" disabled>🖨 Print my report</button></div>
   <div id="teacherMonthlyRecords" class="records-table">Choose My Monthly Records to load your report.</div>
 </section>
+        <section id="unansweredHistorySection" class="page-section">
+            <h2 class="section-title">Not Accepted History</h2>
+            <p class="request-info">Substitute requests that passed their scheduled end time without an Accept or Decline response. These records are kept for reference.</p>
+            <div id="unansweredHistory" class="request-list">
+                <div class="loading">Loading unanswered requests...</div>
+            </div>
+        </section>
+
 </main>
 
 </div>
