@@ -611,6 +611,9 @@ async function loadTeacherRequests() {
     const declineHistoryContainer =
         document.getElementById("declineHistory");
 
+    const unansweredHistoryContainer =
+        document.getElementById("unansweredHistory");
+
     if (!allRequestsContainer && !pendingContainer) {
         return;
     }
@@ -704,6 +707,22 @@ async function loadTeacherRequests() {
 
 
         // =============================================
+        // NOT ACCEPTED / NO RESPONSE HISTORY
+        // =============================================
+        if (unansweredHistoryContainer) {
+            const unansweredRequests = requests.filter(ttIsUnanswered);
+            unansweredHistoryContainer.innerHTML = "";
+            if (unansweredRequests.length === 0) {
+                unansweredHistoryContainer.innerHTML =
+                    '<div class="no-data">No unanswered or expired substitute requests.</div>';
+            } else {
+                unansweredRequests.forEach(request =>
+                    unansweredHistoryContainer.appendChild(createRequestCard(request))
+                );
+            }
+        }
+
+        // =============================================
         // ALL REQUESTS
         // =============================================
 
@@ -766,7 +785,7 @@ async function loadTeacherRequests() {
             : error.code === "unavailable"
                 ? "Can't connect to Firebase right now. Check your internet connection and try again."
                 : "Unable to load requests. Please try again or check the browser console.";
-        for (const container of [allRequestsContainer, pendingContainer, declineHistoryContainer]) {
+        for (const container of [allRequestsContainer, pendingContainer, declineHistoryContainer, unansweredHistoryContainer]) {
             if (!container) continue;
             container.textContent = "";
             const message = document.createElement("p");
@@ -792,8 +811,9 @@ function createRequestCard(request) {
     card.className =
         "request-card";
 
-    const statusInfo =
-        getStatusInfo(request.status);
+    const statusInfo = ttIsUnanswered(request)
+        ? { text: "Not Accepted — No Response", className: "declined" }
+        : getStatusInfo(request.status);
 
     let buttonsHTML = "";
 
@@ -802,7 +822,9 @@ function createRequestCard(request) {
     // PENDING
     // =============================================
 
-    if (request.status === "pending" && request.declineReviewStatus === "rejected") {
+    if (ttIsUnanswered(request)) {
+        buttonsHTML = `<div class="request-actions"><span class="request-completed">No response received before the scheduled end time.</span></div>`;
+    } else if (request.status === "pending" && request.declineReviewStatus === "rejected") {
 
         buttonsHTML = `<div class="request-actions"><span class="request-completed">Decision Finalized by Administrator</span></div>`;
 
