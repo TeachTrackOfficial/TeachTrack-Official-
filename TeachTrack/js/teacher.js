@@ -611,11 +611,16 @@ async function loadTeacherRequests() {
     const declineHistoryContainer =
         document.getElementById("declineHistory");
 
-    const unansweredHistoryContainer =
-        document.getElementById("unansweredHistory");
+    const unansweredCheckbox =
+        document.getElementById("includeUnansweredRequests");
 
     if (!allRequestsContainer && !pendingContainer) {
         return;
+    }
+
+    if (unansweredCheckbox && !unansweredCheckbox.dataset.listenerAttached) {
+        unansweredCheckbox.dataset.listenerAttached = "true";
+        unansweredCheckbox.addEventListener("change", () => loadTeacherRequests());
     }
 
     if (allRequestsContainer) {
@@ -705,23 +710,6 @@ async function loadTeacherRequests() {
 
         }
 
-
-        // =============================================
-        // NOT ACCEPTED / NO RESPONSE HISTORY
-        // =============================================
-        if (unansweredHistoryContainer) {
-            const unansweredRequests = requests.filter(ttIsUnanswered);
-            unansweredHistoryContainer.innerHTML = "";
-            if (unansweredRequests.length === 0) {
-                unansweredHistoryContainer.innerHTML =
-                    '<div class="no-data">No unanswered or expired substitute requests.</div>';
-            } else {
-                unansweredRequests.forEach(request =>
-                    unansweredHistoryContainer.appendChild(createRequestCard(request))
-                );
-            }
-        }
-
         // =============================================
         // ALL REQUESTS
         // =============================================
@@ -747,7 +735,7 @@ async function loadTeacherRequests() {
                 request.status !== "declined" &&
                 request.status !== "declined_pending_review" &&
                 request.declineReviewStatus !== "rejected" &&
-                !ttIsUnanswered(request)
+                (unansweredCheckbox?.checked || !ttIsUnanswered(request))
             );
 
             if (activeRequests.length === 0) {
@@ -785,7 +773,7 @@ async function loadTeacherRequests() {
             : error.code === "unavailable"
                 ? "Can't connect to Firebase right now. Check your internet connection and try again."
                 : "Unable to load requests. Please try again or check the browser console.";
-        for (const container of [allRequestsContainer, pendingContainer, declineHistoryContainer, unansweredHistoryContainer]) {
+        for (const container of [allRequestsContainer, pendingContainer, declineHistoryContainer]) {
             if (!container) continue;
             container.textContent = "";
             const message = document.createElement("p");
