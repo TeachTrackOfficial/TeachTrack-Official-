@@ -4439,7 +4439,7 @@ async function loadMonthlyRecords() {
             }
         }
         const showUnanswered = document.getElementById("tt-show-unanswered")?.checked || false;
-        const reportRecords = reportRecords.filter(r => showUnanswered || !ttIsUnanswered(r));
+        const reportRecords = records.filter(r => showUnanswered || !ttIsUnanswered(r));
 
         let accepted = 0;
         let declined = 0;
